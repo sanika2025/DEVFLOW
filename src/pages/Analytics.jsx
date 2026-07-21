@@ -1,18 +1,42 @@
 import { Card } from '../components/Card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Calendar } from 'lucide-react';
-
-const DATA = [
-  { name: 'Mon', score: 4000, time: 2400 },
-  { name: 'Tue', score: 3000, time: 1398 },
-  { name: 'Wed', score: 2000, time: 9800 },
-  { name: 'Thu', score: 2780, time: 3908 },
-  { name: 'Fri', score: 1890, time: 4800 },
-  { name: 'Sat', score: 2390, time: 3800 },
-  { name: 'Sun', score: 3490, time: 4300 },
-];
+import { Calendar, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { progressService } from '../services/progressService';
+import { useAuthStore } from '../store/useAuthStore';
+import { useMemo } from 'react';
 
 export default function Analytics() {
+  const { user } = useAuthStore();
+
+  const { data: progressData, isLoading } = useQuery({
+    queryKey: ['progress', user?.id],
+    queryFn: () => progressService.getUserProgress(user?.id),
+    enabled: !!user?.id
+  });
+
+  const chartData = useMemo(() => {
+    if (!progressData?.data) return [];
+    
+    // Create a mock past 7 days data structure based on completed days
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    let mockData = days.map(d => ({ name: d, score: 0, time: 0 }));
+
+    progressData.data.forEach(p => {
+      if (p.completed_at) {
+        const d = new Date(p.completed_at).getDay();
+        mockData[d].score += 1000;
+        mockData[d].time += 60; // 1 hr per day mock
+      }
+    });
+
+    return mockData;
+  }, [progressData]);
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-indigo-600" size={32} /></div>;
+  }
+
   return (
     <div className="space-y-6">
       <header>
@@ -28,7 +52,7 @@ export default function Analytics() {
           </div>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorTime" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
@@ -52,7 +76,7 @@ export default function Analytics() {
           </div>
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={DATA} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#34d399" stopOpacity={0.3}/>
@@ -77,6 +101,7 @@ export default function Analytics() {
              {[...Array(5)].map((_, r) => (
                 <div key={r} className="flex gap-1">
                   {[...Array(50)].map((_, c) => {
+                     // For UI visualization purposes right now
                      const intensity = Math.random();
                      let bgClass = 'bg-slate-100';
                      if (intensity > 0.8) bgClass = 'bg-indigo-600';

@@ -7,7 +7,7 @@ export default function MainLayout() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-50">
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setSidebarOpen} />
 

@@ -1,11 +1,53 @@
 import { useState } from 'react';
-import { Search, Filter, Bookmark, CheckCircle, AlertCircle, PlayCircle, Bot } from 'lucide-react';
+import { Search, Filter, Bookmark, CheckCircle, AlertCircle, PlayCircle, Bot, Loader2 } from 'lucide-react';
 import { Card } from '../components/Card';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { interviewService } from '../services/interviewService';
+import { useAuthStore } from '../store/useAuthStore';
 
 const CATEGORIES = ['All', 'React', 'Python', 'System Design', 'SQL', 'Docker', 'Node.js'];
 
 export default function InterviewPrep() {
-  const [activeCategory, setActiveCategory] = useState('React');
+  const { user } = useAuthStore();
+  const queryClient = useQueryClient();
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const { data: questionsData, isLoading } = useQuery({
+    queryKey: ['questions', activeCategory],
+    queryFn: () => interviewService.getQuestions(activeCategory)
+  });
+
+  const { data: bookmarksData } = useQuery({
+    queryKey: ['bookmarks', user?.id, 'interview_question'],
+    queryFn: () => interviewService.getBookmarks(user?.id),
+    enabled: !!user?.id
+  });
+
+  const bookmarkMutation = useMutation({
+    mutationFn: (questionId) => interviewService.saveBookmark(user?.id, questionId),
+    onSuccess: () => queryClient.invalidateQueries(['bookmarks'])
+  });
+
+  const unbookmarkMutation = useMutation({
+    mutationFn: (questionId) => interviewService.removeBookmark(user?.id, questionId),
+    onSuccess: () => queryClient.invalidateQueries(['bookmarks'])
+  });
+
+  const handleToggleBookmark = (qId, isBookmarked) => {
+    if (isBookmarked) {
+      unbookmarkMutation.mutate(qId);
+    } else {
+      bookmarkMutation.mutate(qId);
+    }
+  };
+
+  const questions = questionsData?.data || [];
+  const bookmarkedIds = (bookmarksData?.data || []).map(b => b.item_id);
+
+  const filteredQuestions = questions.filter(q => 
+    q.question.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -43,6 +85,8 @@ export default function InterviewPrep() {
             <input 
               type="text" 
               placeholder="Search questions..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
@@ -55,25 +99,23 @@ export default function InterviewPrep() {
       {/* Questions List */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-4">
-          <QuestionCard 
-            title="Explain the difference between useEffect and useLayoutEffect"
-            difficulty="Medium"
-            category="React"
-            status="review"
-            bookmarked={true}
-          />
-          <QuestionCard 
-            title="How does React Fiber architecture work?"
-            difficulty="Hard"
-            category="React"
-            status="completed"
-          />
-          <QuestionCard 
-            title="What is a Higher-Order Component (HOC)?"
-            difficulty="Medium"
-            category="React"
-            status="new"
-          />
+          {isLoading ? (
+            <div className="flex justify-center p-12"><Loader2 className="animate-spin text-indigo-600" size={32} /></div>
+          ) : filteredQuestions.length === 0 ? (
+            <div className="text-center p-12 text-slate-500 bg-white rounded-xl border border-slate-200">No questions found.</div>
+          ) : (
+            filteredQuestions.map(q => (
+              <QuestionCard 
+                key={q.id}
+                title={q.question}
+                difficulty={q.difficulty || 'Medium'}
+                category={q.category || 'General'}
+                status="new" // Could map from user progress if tracking
+                bookmarked={bookmarkedIds.includes(q.id)}
+                onBookmark={() => handleToggleBookmark(q.id, bookmarkedIds.includes(q.id))}
+              />
+            ))
+          )}
         </div>
 
         {/* AI Feedback / Current Focus */}
@@ -86,12 +128,8 @@ export default function InterviewPrep() {
             <div className="space-y-4">
               <div className="p-4 bg-white rounded-xl border border-indigo-100 shadow-sm">
                 <p className="text-sm text-slate-700">
-                  <span className="font-semibold text-indigo-700">Last Answer:</span> On "Virtual DOM", you explained the diffing process well, but missed mentioning the reconciliation algorithm (Heuristic O(n)).
+                  <span className="font-semibold text-indigo-700">Tip:</span> Keep practicing. Your responses are getting better, but remember to always start with clarifying questions before jumping into a solution!
                 </p>
-                <div className="mt-3 flex justify-between items-center">
-                  <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Score: 8/10</span>
-                  <button className="text-indigo-600 text-xs font-medium hover:underline">Review Answer</button>
-                </div>
               </div>
             </div>
           </Card>
@@ -101,15 +139,15 @@ export default function InterviewPrep() {
             <div className="space-y-3">
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-600">Needs Review (Red)</span>
-                <span className="font-semibold text-rose-600">4</span>
+                <span className="font-semibold text-rose-600">0</span>
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-600">Solid (Green)</span>
-                <span className="font-semibold text-emerald-600">28</span>
+                <span className="font-semibold text-emerald-600">0</span>
               </div>
               <div className="w-full h-2 bg-slate-100 rounded-full mt-2 flex overflow-hidden">
-                <div className="bg-emerald-500 w-[85%] h-full"></div>
-                <div className="bg-rose-500 w-[15%] h-full"></div>
+                <div className="bg-emerald-500 w-[0%] h-full"></div>
+                <div className="bg-rose-500 w-[0%] h-full"></div>
               </div>
             </div>
           </Card>
@@ -119,7 +157,7 @@ export default function InterviewPrep() {
   );
 }
 
-function QuestionCard({ title, difficulty, category, status, bookmarked }) {
+function QuestionCard({ title, difficulty, category, status, bookmarked, onBookmark }) {
   const getDifficultyColor = (diff) => {
     switch(diff) {
       case 'Easy': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -150,7 +188,10 @@ function QuestionCard({ title, difficulty, category, status, bookmarked }) {
       </div>
       
       <div className="p-5 flex flex-col items-end justify-between gap-6 border-l border-slate-100 bg-slate-50/50">
-        <button className={`text-slate-400 hover:text-indigo-500 transition-colors ${bookmarked ? 'text-indigo-500 fill-indigo-500' : ''}`}>
+        <button 
+          onClick={(e) => { e.stopPropagation(); onBookmark(); }}
+          className={`text-slate-400 hover:text-indigo-500 transition-colors ${bookmarked ? 'text-indigo-500 fill-indigo-500' : ''}`}
+        >
           <Bookmark size={20} />
         </button>
         {getStatusIcon(status)}

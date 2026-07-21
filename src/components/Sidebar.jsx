@@ -35,9 +35,9 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       initial={{ width: isOpen ? 280 : 80 }}
       animate={{ width: isOpen ? 280 : 80 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="hidden md:flex flex-col bg-white border-r border-slate-200 h-full relative"
+      className="hidden md:flex flex-col bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 h-full relative"
     >
-      <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-zinc-800">
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 transition-colors absolute right-4"
+          className="p-1.5 rounded-lg text-slate-400 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors absolute right-4"
         >
           {isOpen ? <ChevronLeft size={20} /> : <Menu size={20} />}
         </button>
@@ -73,11 +73,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               to={item.path}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                 ${isActive 
-                  ? 'bg-indigo-50 text-indigo-600 font-medium' 
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-medium' 
+                  : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-zinc-50'
                 }`}
             >
-              <Icon size={20} className={isActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'} />
+              <Icon size={20} className={isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-zinc-500 group-hover:text-slate-600 dark:group-hover:text-zinc-300'} />
               
               <AnimatePresence>
                 {isOpen && (
@@ -94,7 +94,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
               {/* Tooltip for collapsed state */}
               {!isOpen && (
-                <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-slate-800 text-white text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                <div className="absolute left-full ml-4 px-2.5 py-1.5 bg-slate-800 dark:bg-zinc-800 text-white dark:border dark:border-zinc-700 text-xs font-medium rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
                   {item.label}
                 </div>
               )}
@@ -103,10 +103,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         })}
       </div>
 
-      <div className="p-3 border-t border-slate-100">
+      <div className="p-3 border-t border-slate-100 dark:border-zinc-800">
         <Link
           to="/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-zinc-50 transition-colors"
         >
           <Settings size={20} />
           {isOpen && <span className="font-medium whitespace-nowrap">Settings</span>}

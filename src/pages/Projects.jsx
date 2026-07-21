@@ -1,10 +1,29 @@
 import { useState } from 'react';
-import { Plus, GitBranch, ExternalLink, MessageSquare, MoreHorizontal } from 'lucide-react';
+import { Plus, GitBranch, ExternalLink, MessageSquare, MoreHorizontal, Loader2 } from 'lucide-react';
 import { Modal } from '../components/Modal';
+import { useQuery } from '@tanstack/react-query';
+import { projectService } from '../services/projectService';
 
 export default function Projects() {
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+
+  const { data: projectsData, isLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: projectService.getProjects
+  });
+
+  const projects = projectsData?.data || [];
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-64"><Loader2 className="animate-spin text-indigo-600" size={32} /></div>;
+  }
+
+  // Very simplified Kanban mapping: just put them all in "Todo" if no status, or split evenly for demo.
+  // In a real app we'd have a status field on project_tasks. We just map projects for now.
+  const todoProjects = projects.filter((_, i) => i % 3 === 0);
+  const inProgressProjects = projects.filter((_, i) => i % 3 === 1);
+  const completedProjects = projects.filter((_, i) => i % 3 === 2);
 
   return (
     <div className="h-full flex flex-col space-y-6">
@@ -23,21 +42,25 @@ export default function Projects() {
 
       {/* Kanban Board */}
       <div className="flex-1 flex gap-6 overflow-x-auto pb-4 hide-scrollbar">
-        <KanbanColumn title="Todo" count={3}>
-          <ProjectCard title="Portfolio Website Redesign" tech={['React', 'Framer']} progress={0} onClick={() => setSelectedProject({title: "Portfolio Website Redesign", tech: ['React', 'Framer'], progress: 0})} />
-          <ProjectCard title="Expense API" tech={['Node', 'Express', 'PostgreSQL']} progress={10} onClick={() => setSelectedProject({title: "Expense API", tech: ['Node', 'Express', 'PostgreSQL'], progress: 10})} />
+        <KanbanColumn title="Todo" count={todoProjects.length}>
+          {todoProjects.map(p => (
+            <ProjectCard key={p.id} title={p.title} tech={p.tech_stack || []} progress={0} onClick={() => setSelectedProject(p)} />
+          ))}
         </KanbanColumn>
         
-        <KanbanColumn title="In Progress" count={2}>
-          <ProjectCard title="DevMind LearningOS" tech={['React', 'Tailwind']} progress={65} onClick={() => setSelectedProject({title: "DevMind LearningOS", tech: ['React', 'Tailwind'], progress: 65})} />
+        <KanbanColumn title="In Progress" count={inProgressProjects.length}>
+          {inProgressProjects.map(p => (
+            <ProjectCard key={p.id} title={p.title} tech={p.tech_stack || []} progress={50} onClick={() => setSelectedProject(p)} />
+          ))}
         </KanbanColumn>
 
-        <KanbanColumn title="Review" count={1}>
-          <ProjectCard title="Authentication Microservice" tech={['FastAPI', 'JWT']} progress={90} onClick={() => setSelectedProject({title: "Authentication Microservice", tech: ['FastAPI', 'JWT'], progress: 90})} />
+        <KanbanColumn title="Review" count={0}>
         </KanbanColumn>
 
-        <KanbanColumn title="Completed" count={5}>
-          <ProjectCard title="Weather App CLI" tech={['Python']} progress={100} onClick={() => setSelectedProject({title: "Weather App CLI", tech: ['Python'], progress: 100})} />
+        <KanbanColumn title="Completed" count={completedProjects.length}>
+          {completedProjects.map(p => (
+            <ProjectCard key={p.id} title={p.title} tech={p.tech_stack || []} progress={100} onClick={() => setSelectedProject(p)} />
+          ))}
         </KanbanColumn>
       </div>
 
@@ -63,21 +86,21 @@ export default function Projects() {
         {selectedProject && (
           <div className="space-y-6">
             <div className="flex gap-2">
-              {selectedProject.tech.map(t => (
+              {(selectedProject.tech_stack || []).map(t => (
                 <span key={t} className="px-2 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded text-xs font-semibold tracking-wide uppercase">{t}</span>
               ))}
             </div>
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-slate-700 font-medium">
                 <span>Current Progress</span>
-                <span>{selectedProject.progress}%</span>
+                <span>{selectedProject.progress || 0}%</span>
               </div>
               <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{width: `${selectedProject.progress}%`}}></div>
+                <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{width: `${selectedProject.progress || 0}%`}}></div>
               </div>
             </div>
             <p className="text-slate-600 text-sm">
-              This is a placeholder description for {selectedProject.title}. Here you would see the full project details, active tasks, and team members.
+              {selectedProject.description || 'No description provided.'}
             </p>
             <div className="flex gap-3 pt-4 border-t border-slate-100">
               <button className="flex-1 bg-white border border-slate-200 text-slate-700 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition-colors flex justify-center items-center gap-2">
