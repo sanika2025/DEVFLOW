@@ -1,18 +1,24 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { lessonService } from '../services/lessonService';
+import { progressService } from '../services/progressService';
+import { useAuthStore } from '../store/useAuthStore';
 import { Loader2, ArrowLeft, CheckCircle2, XCircle, BrainCircuit } from 'lucide-react';
 import { Card } from '../components/Card';
 
 export default function QuizView() {
   const { dayNumber } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const dayId = searchParams.get('dayId');
+  const { user } = useAuthStore();
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const { data: quizData, isLoading } = useQuery({
     queryKey: ['quiz', dayNumber],
@@ -66,10 +72,27 @@ export default function QuizView() {
   const isAnswered = selectedOption !== null;
   const isCorrect = selectedOption === currentQuestion.correct_index;
 
-  const handleNext = () => {
-    if (isCorrect) setScore(s => s + 1);
+  const handleNext = async () => {
+    let finalScore = score;
+    if (isCorrect) {
+      finalScore += 1;
+      setScore(finalScore);
+    }
     
     if (currentIdx === questions.length - 1) {
+      setIsSaving(true);
+      if (user?.id) {
+        let res;
+        if (dayId) {
+          res = await progressService.markDayComplete(user.id, dayId);
+        } else {
+          res = await progressService.markDayCompleteByNumber(user.id, dayNumber);
+        }
+        if (!res.success) {
+          alert('Error saving progress: ' + res.error);
+        }
+      }
+      setIsSaving(false);
       setIsFinished(true);
     } else {
       setCurrentIdx(i => i + 1);
@@ -101,7 +124,7 @@ export default function QuizView() {
 
         <div className="space-y-3">
           {currentQuestion.options.map((option, idx) => {
-            let optionStyles = "border-slate-200 dark:border-zinc-700 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30 dark:text-zinc-300";
+            let optionStyles = "border-slate-200 dark:border-zinc-800 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/30 dark:text-zinc-300";
             
             if (isAnswered) {
               if (idx === currentQuestion.correct_index) {
@@ -141,10 +164,11 @@ export default function QuizView() {
 
         <div className="mt-8 flex justify-end">
           <button 
-            disabled={!isAnswered}
+            disabled={!isAnswered || isSaving}
             onClick={handleNext}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-colors"
+            className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-50 disabled:hover:bg-indigo-600 transition-colors flex items-center gap-2"
           >
+            {isSaving && <Loader2 size={18} className="animate-spin" />}
             {currentIdx === questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
           </button>
         </div>

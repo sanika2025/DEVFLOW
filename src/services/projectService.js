@@ -10,7 +10,8 @@ export const projectService = {
           milestones:project_milestones(
             *,
             tasks:project_tasks(*)
-          )
+          ),
+          submissions:project_submissions(*)
         `)
         .order('created_at', { ascending: false });
       if (error) throw error;

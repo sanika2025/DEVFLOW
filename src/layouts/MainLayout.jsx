@@ -7,7 +7,7 @@ export default function MainLayout() {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-50">
+    <div className="flex h-screen overflow-hidden bg-mesh-light dark:bg-mesh-dark text-slate-800 dark:text-zinc-50 relative">
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setSidebarOpen} />
 
@@ -17,8 +17,8 @@ export default function MainLayout() {
         <Navbar toggleSidebar={() => setSidebarOpen(!isSidebarOpen)} />
         
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-6 md:p-8">
-          <div className="max-w-7xl mx-auto h-full">
+        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto h-full pb-8 md:pb-0">
             <Outlet />
           </div>
         </main>

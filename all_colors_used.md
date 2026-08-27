@@ -1,0 +1,232 @@
+# All Colors Used in the Platform
+
+## Hex Colors
+- `#020617`
+- `#0f172a`
+- `#10b981`
+- `#1e1e1e`
+- `#1e3a8a`
+- `#2563eb`
+- `#34d399`
+- `#3b82f6`
+- `#4f46e5`
+- `#6366f1`
+- `#64748b`
+- `#7c3aed`
+- `#8b5cf6`
+- `#94a3b8`
+- `#a78bfa`
+- `#d33`
+- `#dbeafe`
+- `#e2e8f0`
+- `#ec4899`
+- `#eef2ff`
+- `#ef4444`
+- `#eff6ff`
+- `#f1f5f9`
+- `#f43f5e`
+- `#f59e0b`
+- `#f8fafc`
+- `#ffffff`
+
+## RGB/RGBA Colors
+- `rgb(0 0 0 / 0.1)`
+- `rgba(0, 0, 0, 0.03)`
+- `rgba(0, 0, 0, 0.05)`
+- `rgba(0, 0, 0, 0.1)`
+- `rgba(0, 0, 0, 0.2)`
+- `rgba(15, 23, 42, 0.4)`
+- `rgba(15, 23, 42, 0.65)`
+- `rgba(255, 255, 255, 0.05)`
+- `rgba(255, 255, 255, 0.3)`
+- `rgba(255, 255, 255, 0.4)`
+- `rgba(255, 255, 255, 0.65)`
+- `rgba(79,70,229,0.5)`
+- `rgba(99, 102, 241, 0.05)`
+- `rgba(99, 102, 241, 0.3)`
+- `rgba(99,102,241,0.2)`
+
+## HSL/HSLA Colors
+- `hsla(189,100%,56%,0.15)`
+- `hsla(250,100%,74%,0.15)`
+- `hsla(355,100%,93%,0.05)`
+- `hsla(355,100%,93%,0.1)`
+
+## Tailwind Color Classes
+- `bg-amber-100`
+- `bg-amber-400`
+- `bg-amber-50`
+- `bg-amber-500`
+- `bg-amber-600`
+- `bg-amber-900`
+- `bg-black`
+- `bg-blue-100`
+- `bg-blue-50`
+- `bg-blue-500`
+- `bg-blue-600`
+- `bg-blue-700`
+- `bg-blue-900`
+- `bg-emerald-100`
+- `bg-emerald-50`
+- `bg-emerald-500`
+- `bg-emerald-600`
+- `bg-emerald-700`
+- `bg-emerald-900`
+- `bg-indigo-100`
+- `bg-indigo-200`
+- `bg-indigo-400`
+- `bg-indigo-50`
+- `bg-indigo-500`
+- `bg-indigo-600`
+- `bg-indigo-700`
+- `bg-indigo-900`
+- `bg-orange-500`
+- `bg-red-100`
+- `bg-red-50`
+- `bg-red-500`
+- `bg-red-900`
+- `bg-rose-100`
+- `bg-rose-200`
+- `bg-rose-50`
+- `bg-rose-500`
+- `bg-rose-900`
+- `bg-slate-100`
+- `bg-slate-200`
+- `bg-slate-300`
+- `bg-slate-400`
+- `bg-slate-50`
+- `bg-slate-500`
+- `bg-slate-800`
+- `bg-slate-900`
+- `bg-transparent`
+- `bg-white`
+- `bg-yellow-100`
+- `bg-zinc-700`
+- `bg-zinc-800`
+- `bg-zinc-900`
+- `border-amber-200`
+- `border-amber-400`
+- `border-amber-500`
+- `border-amber-900`
+- `border-blue-200`
+- `border-blue-500`
+- `border-blue-600`
+- `border-blue-900`
+- `border-emerald-100`
+- `border-emerald-200`
+- `border-emerald-500`
+- `border-emerald-900`
+- `border-indigo-100`
+- `border-indigo-200`
+- `border-indigo-300`
+- `border-indigo-400`
+- `border-indigo-50`
+- `border-indigo-500`
+- `border-indigo-700`
+- `border-indigo-800`
+- `border-indigo-900`
+- `border-red-100`
+- `border-red-200`
+- `border-rose-100`
+- `border-rose-200`
+- `border-rose-500`
+- `border-rose-900`
+- `border-slate-100`
+- `border-slate-200`
+- `border-slate-300`
+- `border-slate-50`
+- `border-slate-700`
+- `border-transparent`
+- `border-white`
+- `border-yellow-400`
+- `border-zinc-700`
+- `border-zinc-800`
+- `border-zinc-900`
+- `divide-slate-100`
+- `divide-zinc-800`
+- `fill-indigo-100`
+- `fill-indigo-500`
+- `fill-slate-300`
+- `from-blue-600`
+- `from-emerald-500`
+- `from-indigo-100`
+- `from-indigo-50`
+- `from-indigo-500`
+- `from-indigo-700`
+- `from-indigo-900`
+- `from-slate-900`
+- `from-zinc-900`
+- `ring-indigo-500`
+- `shadow-black`
+- `shadow-indigo-100`
+- `shadow-indigo-500`
+- `shadow-indigo-900`
+- `shadow-slate-200`
+- `text-amber-100`
+- `text-amber-200`
+- `text-amber-300`
+- `text-amber-500`
+- `text-amber-600`
+- `text-amber-700`
+- `text-amber-800`
+- `text-blue-100`
+- `text-blue-200`
+- `text-blue-300`
+- `text-blue-400`
+- `text-blue-500`
+- `text-blue-600`
+- `text-blue-700`
+- `text-emerald-400`
+- `text-emerald-500`
+- `text-emerald-600`
+- `text-emerald-700`
+- `text-emerald-900`
+- `text-indigo-100`
+- `text-indigo-200`
+- `text-indigo-300`
+- `text-indigo-400`
+- `text-indigo-500`
+- `text-indigo-600`
+- `text-indigo-700`
+- `text-indigo-800`
+- `text-indigo-900`
+- `text-orange-500`
+- `text-red-400`
+- `text-red-500`
+- `text-red-600`
+- `text-rose-400`
+- `text-rose-500`
+- `text-rose-600`
+- `text-rose-700`
+- `text-rose-900`
+- `text-slate-100`
+- `text-slate-200`
+- `text-slate-300`
+- `text-slate-400`
+- `text-slate-500`
+- `text-slate-600`
+- `text-slate-700`
+- `text-slate-800`
+- `text-slate-900`
+- `text-white`
+- `text-zinc-100`
+- `text-zinc-200`
+- `text-zinc-300`
+- `text-zinc-400`
+- `text-zinc-50`
+- `text-zinc-500`
+- `text-zinc-600`
+- `to-emerald-700`
+- `to-indigo-50`
+- `to-indigo-800`
+- `to-indigo-900`
+- `to-purple-50`
+- `to-purple-500`
+- `to-purple-600`
+- `to-purple-800`
+- `to-slate-800`
+- `to-violet-100`
+- `to-violet-50`
+- `to-violet-500`
+- `to-zinc-800`
+

@@ -45,8 +45,8 @@ export default function AIMentor() {
       if (res.data?.sessionId && !sessionId) {
         setSessionId(res.data.sessionId);
       }
-      queryClient.invalidateQueries(['chat-messages', sessionId || res.data?.sessionId]);
-      queryClient.invalidateQueries(['chat-sessions', user?.id]);
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', sessionId || res.data?.sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-sessions', user?.id] });
       setInput('');
     }
   });

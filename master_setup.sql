@@ -1705,3 +1705,304 @@ VALUES
 (gen_random_uuid(), '40000000-0000-0000-0000-00000000001c', '60000000-0000-0000-0000-00000000001c'),
 (gen_random_uuid(), '40000000-0000-0000-0000-00000000001d', '60000000-0000-0000-0000-00000000001d'),
 (gen_random_uuid(), '40000000-0000-0000-0000-00000000001e', '60000000-0000-0000-0000-00000000001e') ON CONFLICT DO NOTHING;
+
+-- ==========================================
+-- Migration 07: Finance & Budgeting
+-- ==========================================
+
+CREATE TABLE expenses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  amount NUMERIC(10,2) NOT NULL,
+  category TEXT NOT NULL,
+  description TEXT,
+  date TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE income (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  amount NUMERIC(10,2) NOT NULL,
+  source TEXT NOT NULL,
+  date TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE budgets (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  category TEXT NOT NULL,
+  monthly_limit NUMERIC(10,2) NOT NULL,
+  month_year TEXT NOT NULL, -- e.g. '2026-08'
+  UNIQUE(user_id, category, month_year)
+);
+
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE income ENABLE ROW LEVEL SECURITY;
+ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own expenses" ON expenses FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own income" ON income FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own budgets" ON budgets FOR ALL USING (auth.uid() = user_id);
+
+-- ==========================================
+-- Migration 08: Health & Workout
+-- ==========================================
+
+CREATE TABLE workout_plans (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE exercises (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  workout_plan_id UUID REFERENCES workout_plans(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  sets INTEGER DEFAULT 3,
+  reps INTEGER DEFAULT 10,
+  weight_lbs NUMERIC(5,2)
+);
+
+CREATE TABLE workout_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  workout_plan_id UUID REFERENCES workout_plans(id) ON DELETE SET NULL,
+  completed_at TIMESTAMPTZ DEFAULT NOW(),
+  duration_minutes INTEGER
+);
+
+CREATE TABLE health_metrics (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  date DATE DEFAULT CURRENT_DATE,
+  sleep_hours NUMERIC(4,2),
+  water_glasses INTEGER DEFAULT 0,
+  steps INTEGER DEFAULT 0,
+  weight NUMERIC(5,2),
+  UNIQUE(user_id, date)
+);
+
+ALTER TABLE workout_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE exercises ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workout_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE health_metrics ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own workout_plans" ON workout_plans FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own exercises" ON exercises FOR ALL USING (
+  workout_plan_id IN (SELECT id FROM workout_plans WHERE user_id = auth.uid())
+);
+CREATE POLICY "Users can manage own workout_logs" ON workout_logs FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own health_metrics" ON health_metrics FOR ALL USING (auth.uid() = user_id);
+
+-- ==========================================
+-- Migration 09: Tasks & Planner
+-- ==========================================
+
+CREATE TABLE tasks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  due_date TIMESTAMPTZ,
+  status TEXT DEFAULT 'todo' CHECK (status IN ('todo', 'in-progress', 'done')),
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE time_blocks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  task_id UUID REFERENCES tasks(id) ON DELETE CASCADE,
+  start_time TIMESTAMPTZ NOT NULL,
+  end_time TIMESTAMPTZ NOT NULL
+);
+
+CREATE TABLE habits (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  frequency TEXT DEFAULT 'daily',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE habit_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  habit_id UUID REFERENCES habits(id) ON DELETE CASCADE,
+  date DATE DEFAULT CURRENT_DATE,
+  completed BOOLEAN DEFAULT false,
+  UNIQUE(user_id, habit_id, date)
+);
+
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE time_blocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE habit_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own tasks" ON tasks FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own time_blocks" ON time_blocks FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own habits" ON habits FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own habit_logs" ON habit_logs FOR ALL USING (auth.uid() = user_id);
+
+-- ==========================================
+-- Migration 10: Career & Skills
+-- ==========================================
+
+CREATE TABLE career_profiles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  current_job_title TEXT,
+  target_job_title TEXT,
+  years_experience NUMERIC(3,1) DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id)
+);
+
+CREATE TABLE skills (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  category TEXT
+);
+
+CREATE TABLE user_skills (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  skill_id UUID REFERENCES skills(id) ON DELETE CASCADE,
+  current_level INTEGER DEFAULT 1 CHECK (current_level BETWEEN 1 AND 5),
+  target_level INTEGER DEFAULT 5 CHECK (target_level BETWEEN 1 AND 5),
+  UNIQUE(user_id, skill_id)
+);
+
+ALTER TABLE career_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_skills ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own career_profiles" ON career_profiles FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Anyone can read skills" ON skills FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Admins can manage skills" ON skills FOR ALL USING (is_admin());
+CREATE POLICY "Users can manage own user_skills" ON user_skills FOR ALL USING (auth.uid() = user_id);
+
+CREATE TRIGGER update_career_profiles_modtime BEFORE UPDATE ON career_profiles FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();
+
+-- ==========================================
+-- Migration 07: Simple Life Manager
+-- ==========================================
+
+-- 1. Update Profiles with user_mode
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS user_mode TEXT DEFAULT 'full' CHECK (user_mode IN ('full', 'simple_life'));
+
+-- 2. Simple Life Tables
+CREATE TABLE IF NOT EXISTS expenses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  amount NUMERIC(10, 2) NOT NULL,
+  category TEXT NOT NULL,
+  description TEXT,
+  date TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS income (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  amount NUMERIC(10, 2) NOT NULL,
+  source TEXT NOT NULL,
+  date TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS recurring_bills (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  amount NUMERIC(10, 2) NOT NULL,
+  due_date INTEGER CHECK (due_date BETWEEN 1 AND 31),
+  frequency TEXT DEFAULT 'monthly',
+  category TEXT,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS shifts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  shift_type TEXT NOT NULL CHECK (shift_type IN ('Morning', 'Evening', 'Night', 'Off', 'Custom')),
+  start_time TIME,
+  end_time TIME,
+  location TEXT,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS shift_patterns (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  day_of_week INTEGER CHECK (day_of_week BETWEEN 0 AND 6),
+  shift_type TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS routines (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME,
+  days TEXT[] DEFAULT '{}',
+  category TEXT,
+  shift_type TEXT,
+  enabled BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS home_visits (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  departure DATE NOT NULL,
+  return DATE,
+  destination TEXT DEFAULT 'Home',
+  travel_cost NUMERIC(10, 2),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  due_date TIMESTAMPTZ,
+  priority TEXT DEFAULT 'medium',
+  completed BOOLEAN DEFAULT false,
+  recurring TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Row Level Security Policies
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE income ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recurring_bills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shifts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shift_patterns ENABLE ROW LEVEL SECURITY;
+ALTER TABLE routines ENABLE ROW LEVEL SECURITY;
+ALTER TABLE home_visits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can manage own expenses" ON expenses FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own income" ON income FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own recurring_bills" ON recurring_bills FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own shifts" ON shifts FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own shift_patterns" ON shift_patterns FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own routines" ON routines FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own home_visits" ON home_visits FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "Users can manage own tasks" ON tasks FOR ALL USING (auth.uid() = user_id);
+
+-- 4. Updated At Triggers
+CREATE TRIGGER update_expenses_modtime BEFORE UPDATE ON expenses FOR EACH ROW EXECUTE PROCEDURE update_updated_at_column();

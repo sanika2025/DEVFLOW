@@ -1,25 +1,44 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Swal from 'sweetalert2';
 
 export default function Signup() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const { signup, loading } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-    const { success, error } = await signup(email, password, fullName);
+    const { success, error, data } = await signup(email, password, fullName);
     if (success) {
-      navigate('/dashboard');
+      if (data?.session) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Welcome!',
+          text: 'Account created successfully.',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        navigate('/dashboard');
+      } else {
+        Swal.fire({
+          icon: 'info',
+          title: 'Verify Email',
+          text: 'Successfully signed up! Please check your email to confirm your account before logging in.'
+        });
+      }
     } else {
-      setErrorMsg(error || 'Failed to sign up');
+      Swal.fire({
+        icon: 'error',
+        title: 'Signup Failed',
+        text: error || 'Failed to sign up'
+      });
     }
   };
 
@@ -37,12 +56,6 @@ export default function Signup() {
           <h2 className="text-2xl font-bold text-slate-800">Create Account</h2>
           <p className="text-slate-500 mt-2">Join AI Learning OS today.</p>
         </div>
-
-        {errorMsg && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm font-medium border border-red-100">
-            {errorMsg}
-          </div>
-        )}
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
@@ -80,13 +93,20 @@ export default function Signup() {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                className="w-full pl-10 pr-10 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                 placeholder="••••••••"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 

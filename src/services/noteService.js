@@ -15,7 +15,7 @@ export const noteService = {
     }
   },
 
-  createNote: async (userId, title = 'Untitled Note', folderId = 'general', content = '') => {
+  createNote: async (userId, title = 'Untitled Note', folderId = 'general', content = '', tags = []) => {
     try {
       const { data, error } = await supabase
         .from('user_notes')
@@ -23,7 +23,10 @@ export const noteService = {
           user_id: userId,
           title,
           folder_id: folderId,
-          content
+          content,
+          tags,
+          is_favorite: false,
+          revision_status: 'Not Reviewed'
         })
         .select()
         .single();
@@ -36,9 +39,12 @@ export const noteService = {
 
   updateNote: async (noteId, updates) => {
     try {
+      // Don't update id or user_id
+      const { id, user_id, ...safeUpdates } = updates;
+      
       const { data, error } = await supabase
         .from('user_notes')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update({ ...safeUpdates, updated_at: new Date().toISOString() })
         .eq('id', noteId)
         .select()
         .single();

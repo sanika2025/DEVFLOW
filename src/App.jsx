@@ -9,19 +9,36 @@ import InterviewPrep from './pages/InterviewPrep';
 import AIMentor from './pages/AIMentor';
 import ExpenseTracker from './pages/ExpenseTracker';
 import Projects from './pages/Projects';
-import Analytics from './pages/Analytics';
+
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import LessonView from './pages/LessonView';
 import QuizView from './pages/QuizView';
+import SystemDesignSandbox from './pages/SystemDesignSandbox';
+import Planner from './pages/Planner';
+import Workout from './pages/Workout';
+
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Simple Life Pages
+import SimpleDashboard from './pages/simple/SimpleDashboard';
+import SimpleMoney from './pages/simple/SimpleMoney';
+import SimpleShifts from './pages/simple/SimpleShifts';
+import SimpleHomeVisits from './pages/simple/SimpleHomeVisits';
+import SimpleRoutine from './pages/simple/SimpleRoutine';
+import SimpleTasks from './pages/simple/SimpleTasks';
+
 function App() {
-  const { initialize } = useAuthStore();
+  const { initialize, profile } = useAuthStore();
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  const isSimpleLife = profile?.user_mode === 'simple_life';
+  const defaultDashboard = isSimpleLife ? '/simple-dashboard' : '/dashboard';
 
   return (
     <Routes>
@@ -32,8 +49,10 @@ function App() {
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route index element={<Navigate to={defaultDashboard} replace />} />
+          
+          {/* Full Mode Routes */}
+          <Route path="dashboard" element={isSimpleLife ? <Navigate to="/simple-dashboard" replace /> : <Dashboard />} />
           <Route path="learning" element={<LearningHub />} />
           <Route path="learning/lesson/:lessonId" element={<LessonView />} />
           <Route path="learning/quiz/:dayNumber" element={<QuizView />} />
@@ -42,7 +61,23 @@ function App() {
           <Route path="ai-mentor" element={<AIMentor />} />
           <Route path="expenses" element={<ExpenseTracker />} />
           <Route path="projects" element={<Projects />} />
-          <Route path="analytics" element={<Analytics />} />
+
+          <Route path="sandbox" element={<SystemDesignSandbox />} />
+          <Route path="planner" element={<Planner />} />
+          <Route path="workout" element={<Workout />} />
+
+          
+          {/* Simple Life Routes */}
+          <Route path="simple-dashboard" element={<SimpleDashboard />} />
+          <Route path="simple-money" element={<SimpleMoney />} />
+          <Route path="simple-shifts" element={<SimpleShifts />} />
+          <Route path="simple-home-visits" element={<SimpleHomeVisits />} />
+          <Route path="simple-routine" element={<SimpleRoutine />} />
+          <Route path="simple-tasks" element={<SimpleTasks />} />
+
+          {/* Shared Routes */}
+          <Route path="settings" element={<Settings />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Route>
     </Routes>
