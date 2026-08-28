@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
@@ -51,6 +52,13 @@ const SIMPLE_NAV_ITEMS = [
 export default function Sidebar({ isOpen, setIsOpen }) {
   const location = useLocation();
   const { logout, profile } = useAuthStore();
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const isSimpleLife = profile?.user_mode === 'simple_life';
   const currentNavItems = isSimpleLife ? SIMPLE_NAV_ITEMS : FULL_NAV_ITEMS;
@@ -71,10 +79,12 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       <motion.aside
         initial={false}
-        animate={{ width: isOpen ? 280 : 80 }}
+        animate={{ 
+          width: isOpen ? 280 : 80,
+          x: isMobile ? (isOpen ? 0 : '-100%') : 0
+        }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className={`fixed md:relative top-0 left-0 h-full flex flex-col glass-panel dark:glass-panel-dark z-50 shadow-xl md:shadow-lg transition-transform duration-300 md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:flex`}
-        style={{ width: isOpen ? 280 : 80 }}
+        className="fixed md:relative top-0 left-0 h-full flex flex-col glass-panel dark:glass-panel-dark z-50 shadow-xl md:shadow-lg md:flex"
       >
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-zinc-800">
         <AnimatePresence>
