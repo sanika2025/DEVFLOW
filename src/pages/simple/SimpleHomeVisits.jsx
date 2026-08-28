@@ -168,39 +168,39 @@ export default function SimpleHomeVisits() {
 
       {/* Primary Next Visit Card */}
       {d.nextVisit ? (
-        <Card className="bg-amber-500 text-white border-none shadow-xl overflow-hidden relative group">
-          <div className="absolute right-0 top-0 w-64 h-64 bg-amber-400 rounded-full blur-3xl opacity-50 -mr-20 -mt-20 pointer-events-none transition-transform group-hover:scale-110"></div>
+        <Card className="bg-amber-500/10 text-slate-800 dark:text-zinc-50 border-none shadow-xl overflow-hidden relative group">
+          <div className="absolute right-0 top-0 w-64 h-64 bg-amber-400 rounded-full blur-3xl opacity-30 -mr-20 -mt-20 pointer-events-none transition-transform group-hover:scale-110"></div>
           <div className="relative z-10 p-6 md:p-8">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-amber-100 text-sm font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
+                <p className="text-amber-600 dark:text-amber-400 text-sm font-bold tracking-widest uppercase mb-4 flex items-center gap-2">
                   <Home size={16} /> NEXT HOME VISIT
                 </p>
-                <h3 className="text-5xl md:text-6xl font-black tracking-tight mb-2">
+                <h3 className="text-5xl md:text-6xl font-black tracking-tight mb-2 text-slate-900 dark:text-zinc-50">
                   {d.nextVisit.daysUntil === 0 ? "Today" : d.nextVisit.daysUntil < 0 ? "Ongoing" : `in ${d.nextVisit.daysUntil} days`}
                 </h3>
-                <p className="text-xl text-amber-100 font-bold mb-6">
+                <p className="text-xl text-slate-600 dark:text-zinc-400 font-bold mb-6">
                   {new Date(d.nextVisit.departure).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} 
                   {d.nextVisit.return && ` → ${new Date(d.nextVisit.return).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
                 </p>
               </div>
-              <button onClick={() => delVisitMut.mutate(d.nextVisit.id)} className="bg-amber-600/50 hover:bg-amber-600 p-2 rounded-xl transition-colors">
+              <button onClick={() => delVisitMut.mutate(d.nextVisit.id)} className="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50 p-2 rounded-xl transition-colors">
                 <Trash size={20} />
               </button>
             </div>
             
             <div className="flex flex-wrap gap-4 text-sm mt-4">
-              <div className="bg-amber-600/40 px-4 py-2 rounded-xl backdrop-blur-sm border border-amber-400/30">
-                <p className="text-amber-200 mb-1 uppercase text-xs font-bold">Stay</p>
-                <p className="font-bold text-lg">{d.nextVisit.duration} Days</p>
+              <div className="bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                <p className="text-amber-700 dark:text-amber-400 mb-1 uppercase text-xs font-bold">Stay</p>
+                <p className="font-bold text-lg text-amber-950 dark:text-amber-100">{d.nextVisit.duration} Days</p>
               </div>
-              <div className="bg-amber-600/40 px-4 py-2 rounded-xl backdrop-blur-sm border border-amber-400/30">
-                <p className="text-amber-200 mb-1 uppercase text-xs font-bold">Mode</p>
-                <p className="font-bold text-lg flex items-center gap-2">{getTravelIcon(d.nextVisit.travel_mode)} {d.nextVisit.travel_mode}</p>
+              <div className="bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                <p className="text-amber-700 dark:text-amber-400 mb-1 uppercase text-xs font-bold">Mode</p>
+                <p className="font-bold text-lg text-amber-950 dark:text-amber-100 flex items-center gap-2">{getTravelIcon(d.nextVisit.travel_mode)} {d.nextVisit.travel_mode}</p>
               </div>
-              <div className="bg-amber-600/40 px-4 py-2 rounded-xl backdrop-blur-sm border border-amber-400/30">
-                <p className="text-amber-200 mb-1 uppercase text-xs font-bold">Budget</p>
-                <p className="font-bold text-lg">₹{parseFloat(d.nextVisit.estimated_cost || 0).toLocaleString()}</p>
+              <div className="bg-amber-100 dark:bg-amber-900/30 px-4 py-2 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                <p className="text-amber-700 dark:text-amber-400 mb-1 uppercase text-xs font-bold">Budget</p>
+                <p className="font-bold text-lg text-amber-950 dark:text-amber-100">₹{parseFloat(d.nextVisit.estimated_cost || 0).toLocaleString()}</p>
               </div>
             </div>
           </div>

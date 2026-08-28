@@ -8,6 +8,42 @@ import { Modal } from '../components/Modal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Flame, Dumbbell, Clock, Calendar as CalendarIcon, CheckCircle2, PlayCircle, Plus, Trash2, GripVertical, Target, X, Trophy, Loader2 } from 'lucide-react';
 
+const WORKOUT_TEMPLATES = {
+  'Full Body': {
+    title: 'Full Body Workout',
+    description: 'A comprehensive full body routine targeting all major muscle groups.',
+    difficulty: 'Intermediate',
+    duration: 60,
+    exercises: [
+      { id: 1001, name: 'Barbell Squats', sets: 4, reps: 8, weight_lbs: 0, rest_time: 90 },
+      { id: 1002, name: 'Bench Press', sets: 4, reps: 8, weight_lbs: 0, rest_time: 90 },
+      { id: 1003, name: 'Barbell Rows', sets: 3, reps: 10, weight_lbs: 0, rest_time: 60 }
+    ]
+  },
+  'Upper / Lower': {
+    title: 'Upper Body Power',
+    description: 'Focuses on chest, back, shoulders, and arms.',
+    difficulty: 'Intermediate',
+    duration: 45,
+    exercises: [
+      { id: 1004, name: 'Overhead Press', sets: 4, reps: 8, weight_lbs: 0, rest_time: 90 },
+      { id: 1005, name: 'Pull-ups', sets: 3, reps: 10, weight_lbs: 0, rest_time: 90 },
+      { id: 1006, name: 'Dumbbell Curls', sets: 3, reps: 12, weight_lbs: 0, rest_time: 60 }
+    ]
+  },
+  'Beginner': {
+    title: 'Beginner Basics',
+    description: 'A great starting point for someone new to lifting.',
+    difficulty: 'Beginner',
+    duration: 30,
+    exercises: [
+      { id: 1007, name: 'Goblet Squats', sets: 3, reps: 10, weight_lbs: 0, rest_time: 60 },
+      { id: 1008, name: 'Push-ups', sets: 3, reps: 10, weight_lbs: 0, rest_time: 60 },
+      { id: 1009, name: 'Dumbbell Rows', sets: 3, reps: 10, weight_lbs: 0, rest_time: 60 }
+    ]
+  }
+};
+
 export default function Workout() {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
@@ -17,6 +53,12 @@ export default function Workout() {
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(location.state?.openCreateModal || false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [activeSession, setActiveSession] = useState(null); // When not null, we are in active workout mode
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+
+  const handleTemplateClick = (templateName) => {
+    setSelectedTemplate(WORKOUT_TEMPLATES[templateName]);
+    setIsRoutineModalOpen(true);
+  };
   
   // Data Fetching
   const { data: routinesData, isLoading: routinesLoading } = useQuery({
@@ -163,7 +205,7 @@ export default function Workout() {
           <p className="text-slate-500 dark:text-zinc-400 mt-1">Stay consistent, track your progress, and keep your routine simple.</p>
         </div>
         <button 
-          onClick={() => setIsRoutineModalOpen(true)}
+          onClick={() => { setSelectedTemplate(null); setIsRoutineModalOpen(true); }}
           className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm hover:bg-indigo-700 transition-colors flex items-center gap-2"
         >
           <Plus size={18} /> New Routine
@@ -332,17 +374,17 @@ export default function Workout() {
                   </div>
                   <h4 className="text-lg font-bold text-slate-800 dark:text-zinc-50 mb-1">Build your routine</h4>
                   <p className="text-sm text-slate-500 max-w-sm mx-auto mb-6">Create a simple workout plan and start tracking your consistency.</p>
-                  <button onClick={() => setIsRoutineModalOpen(true)} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm hover:bg-indigo-700 transition-colors">
+                  <button onClick={() => { setSelectedTemplate(null); setIsRoutineModalOpen(true); }} className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-medium shadow-sm hover:bg-indigo-700 transition-colors">
                     + Create Routine
                   </button>
                   
                   <div className="mt-8 pt-8 border-t border-slate-100 dark:border-zinc-800/50 text-left">
                     <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-2">Templates</span>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
-                      {['Full Body', 'Upper / Lower', 'Beginner'].map(t => (
-                        <div key={t} className="p-3 bg-white dark:bg-zinc-900 rounded-lg border border-slate-100 dark:border-zinc-800 text-sm font-medium text-slate-700 dark:text-zinc-300 hover:border-indigo-300 cursor-pointer transition-colors text-center">
+                      {Object.keys(WORKOUT_TEMPLATES).map(t => (
+                        <button key={t} onClick={() => handleTemplateClick(t)} className="p-3 bg-white dark:bg-zinc-900 rounded-lg border border-slate-100 dark:border-zinc-800 text-sm font-medium text-slate-700 dark:text-zinc-300 hover:border-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 cursor-pointer transition-colors text-center w-full">
                           {t}
-                        </div>
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -396,7 +438,13 @@ export default function Workout() {
         </div>
       </div>
 
-      <CreateRoutineModal isOpen={isRoutineModalOpen} onClose={() => setIsRoutineModalOpen(false)} onSubmit={(data) => createRoutineMutation.mutate(data)} isPending={createRoutineMutation.isPending} />
+      <CreateRoutineModal 
+        isOpen={isRoutineModalOpen} 
+        onClose={() => { setIsRoutineModalOpen(false); setSelectedTemplate(null); }} 
+        onSubmit={(data) => createRoutineMutation.mutate(data)} 
+        isPending={createRoutineMutation.isPending} 
+        initialData={selectedTemplate}
+      />
       
       <Modal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} title="Personal Goals">
         <form onSubmit={(e) => {
@@ -428,7 +476,7 @@ export default function Workout() {
 // Subcomponents
 // ----------------------------------------------------------------------
 
-function CreateRoutineModal({ isOpen, onClose, onSubmit, isPending }) {
+function CreateRoutineModal({ isOpen, onClose, onSubmit, isPending, initialData }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [difficulty, setDifficulty] = useState('Intermediate');
@@ -438,9 +486,18 @@ function CreateRoutineModal({ isOpen, onClose, onSubmit, isPending }) {
 
   useEffect(() => {
     if (isOpen) {
-      setTitle(''); setDescription(''); setDifficulty('Intermediate'); setDays([]); setDuration(45); setExercises([]);
+      if (initialData) {
+        setTitle(initialData.title || '');
+        setDescription(initialData.description || '');
+        setDifficulty(initialData.difficulty || 'Intermediate');
+        setDays(initialData.days_of_week || []);
+        setDuration(initialData.duration || 45);
+        setExercises(initialData.exercises ? [...initialData.exercises] : []);
+      } else {
+        setTitle(''); setDescription(''); setDifficulty('Intermediate'); setDays([]); setDuration(45); setExercises([]);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   const handleAddExercise = () => {
     setExercises([...exercises, { id: Date.now(), name: '', sets: 3, reps: 10, weight_lbs: 0, rest_time: 60, order_index: exercises.length }]);

@@ -84,7 +84,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           x: isMobile ? (isOpen ? 0 : '-100%') : 0
         }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="fixed md:relative top-0 left-0 h-full flex flex-col glass-panel dark:glass-panel-dark z-50 shadow-xl md:shadow-lg md:flex"
+        className="fixed md:relative top-0 left-0 h-full flex flex-col glass-panel dark:glass-panel-dark max-md:!bg-white max-md:dark:!bg-zinc-950 z-50 shadow-xl md:shadow-lg md:flex"
       >
       <div className="h-16 flex items-center justify-between px-4 border-b border-slate-100 dark:border-zinc-800">
         <AnimatePresence>
@@ -123,11 +123,11 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               onClick={() => { if (window.innerWidth < 768) setIsOpen(false); }}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative
                 ${isActive 
-                  ? 'bg-gradient-to-r from-indigo-50 to-violet-50 dark:bg-indigo-500/10 dark:bg-none text-indigo-600 dark:text-indigo-400 font-semibold shadow-sm border-l-2 border-indigo-600 dark:border-indigo-500 dark:shadow-[inset_2px_0_10px_rgba(99,102,241,0.15)]' 
-                  : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50/50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200 hover:shadow-sm border-l-2 border-transparent'
+                  ? 'bg-gradient-to-r from-indigo-50 to-violet-50 dark:bg-indigo-500/10 dark:bg-none text-indigo-600 dark:text-indigo-400 font-bold shadow-sm border-l-2 border-indigo-600 dark:border-indigo-500 dark:shadow-[inset_2px_0_10px_rgba(99,102,241,0.15)]' 
+                  : 'text-slate-700 dark:text-zinc-300 font-medium hover:bg-slate-50/50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-100 hover:shadow-sm border-l-2 border-transparent'
                 }`}
             >
-              <Icon size={20} className={isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-zinc-500 group-hover:text-slate-600 dark:group-hover:text-zinc-200'} />
+              <Icon size={20} className={isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-zinc-400 group-hover:text-slate-700 dark:group-hover:text-zinc-200'} />
               
               <AnimatePresence>
                 {isOpen && (
@@ -157,7 +157,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         <Link
           to="/settings"
           onClick={() => { if (window.innerWidth < 768) setIsOpen(false); }}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-200 transition-colors group relative border-l-2 border-transparent"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-700 dark:text-zinc-300 font-medium hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors group relative border-l-2 border-transparent"
         >
           <Settings size={20} />
           <AnimatePresence>
@@ -171,7 +171,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         </Link>
         <button
           onClick={() => logout()}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors group relative"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 dark:text-red-400 font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors group relative"
         >
           <LogOut size={20} />
           <AnimatePresence>
